@@ -1,3 +1,21 @@
 #python
 *.so
 *.egg
+
+# 排除所有.开头的文件
+.*
+# 排除所有.class文件
+*.class
+
+# 不排除.gitignore和app.class
+!.gitignore
+!app.class
+
+# Pyre type checker
+.pyre/
+
+# pytype static type analyzer
+.pytype/
+
+# Cython debug symbols
+cython_debug/
