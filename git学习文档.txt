@@ -55,17 +55,124 @@ git checkout -- file命令中的--很重要，没有--，就变成了“切换�
 撤销暂存区命令如下：
 Git同样告诉我们，用命令git reset HEAD <file>可以把暂存区的修改撤销掉（unstage），重新放回工作区
 操作后显示
-$ git reset head readme.txt
+$ git reset HEAD readme.txt
 Unstaged changes after reset:
 M       readme.txt
 小结：
 场景1：当你改乱了工作区某个文件的内容，想直接丢弃工作区的修改时，用命令git checkout -- file。
 
 场景2：当你不但改乱了工作区某个文件的内容，还添加到了暂存区时，想丢弃修改，分两步，
-第一步用命令git reset HEAD <file>，就回到了场景1，第二步按场景1操作。
+第一步用命令git 
+ HEAD <file>，就回到了场景1，第二步按场景1操作。
 
 场景3：已经提交了不合适的修改到版本库时，想要撤销本次提交，参考版本回退一节，不过前提是没有推送到远程库。
 
 ---删除文件
 命令git rm用于删除一个文件。如果一个文件已经被提交到版本库，那么你永远不用担心误删，
 但是要小心，你只能恢复文件到最新版本，你会丢失最近一次提交后你修改的内容。
+
+---关联远程仓库
+ssh-keygen（基于密匙的安全验证）：需要依靠密钥进行安全验证，必须为自己创建一对密钥，并把公用密钥放在需要访问的服务器上。
+	-t 即指定密钥的类型。密钥的类型有两种，一种是RSA，一种是DSA。
+	-b 指定密钥长度。对于RSA密钥，最小要求768位，默认是2048位。命令中的4096指的是RSA密钥长度为4096位。DSA密钥必须恰好是1024位(FIPS 186-2 标准的要求)。
+	-C 表示要提供一个新注释，用于识别这个密钥。“”里面不一定非要填邮箱，可以是任何内容，邮箱仅仅是识别用的key。
+
+要关联一个远程库，使用命令
+git remote add 新远程仓库名 新远程仓库地址
+ex:git remote add origin git@server-name:path/repo-name.git；
+
+关联一个远程库时必须给远程库指定一个名字，origin是默认习惯命名；
+关联后，使用命令
+git push -u origin master第一次推送master分支的所有内容；
+此后，每次本地提交后，只要有必要，就可以使用命令git push origin master推送最新修改；
+---删除远程库
+$ git remote rm origin
+此处的“删除”其实是解除了本地和远程的绑定关系，并不是物理上删除了远程库。
+远程库本身并没有任何改动。要真正删除远程库，需要登录到GitHub，在后台页面找到删除按钮再删除。
+
+git remote -v查看远程库信息：
+
+$ git remote -v
+origin  git@github.com:michaelliao/learn-git.git (fetch)
+origin  git@github.com:michaelliao/learn-git.git (push)
+
+git远程库协议
+要克隆一个仓库，首先必须知道仓库的地址，然后使用git clone命令克隆。
+Git支持多种协议，包括https，但ssh协议速度最快。
+使用https除了速度慢以外，还有个最大的麻烦是每次推送都必须输入口令，但是在某些只开放http端口的公司内部就无法使用ssh协议而只能用https。
+
+使用分支
+Git鼓励大量使用分支：
+
+查看分支：git branch
+创建分支：git branch <name>
+切换分支：git checkout <name>或者git switch <name>
+创建+切换分支：git checkout -b <name>或者git switch -c <name>
+合并某分支到当前分支：git merge <name>
+删除分支：git branch -d <name>
+
+解决冲突
+当Git无法自动合并分支时，就必须首先解决冲突。解决冲突后，再提交，合并完成。
+解决冲突就是把Git合并失败的文件手动编辑为我们希望的内容，再提交。
+用git log --graph命令可以看到分支合并图。
+
+推送分支
+推送分支，就是把该分支上的所有本地提交推送到远程库。推送时，要指定本地分支，这样，Git就会把该分支推送到远程库对应的远程分支上：
+$ git push origin master
+如果要推送其他分支，比如dev，就改成：
+$ git push origin dev
+但是，并不是一定要把本地分支往远程推送，那么，哪些分支需要推送，哪些不需要呢？
+master分支是主分支，因此要时刻与远程同步；
+dev分支是开发分支，团队所有成员都需要在上面工作，所以也需要与远程同步；
+bug分支只用于在本地修复bug，就没必要推到远程了，除非老板要看看你每周到底修复了几个bug；
+feature分支是否推到远程，取决于你是否和你的小伙伴合作在上面开发。
+
+抓取分支
+clone时只能克隆master分支
+克隆dev分支命令
+git checkout -b dev origin/dev
+
+多人协作
+1、首先，可以试图用git push origin <branch-name>推送自己的修改；
+2、如果推送失败，则因为远程分支比你的本地更新，需要先用git pull试图合并；
+3、如果合并有冲突，则解决冲突，并在本地提交；
+4、没有冲突或者解决掉冲突后，再用git push origin <branch-name>推送就能成功！
+如果git pull提示no tracking information，则说明本地分支和远程分支的链接关系没有创建，
+用命令git branch --set-upstream-to <branch-name> origin/<branch-name>。
+
+新建标签
+命令git tag <tagname>用于新建一个标签，默认为HEAD，也可以指定一个commit id；
+命令git tag -a <tagname> -m "blablabla..."可以指定标签信息；
+命令git tag可以查看所有标签。
+
+操作标签
+命令git push origin <tagname>可以推送一个本地标签；
+命令git push origin --tags可以推送全部未推送过的本地标签；
+命令git tag -d <tagname>可以删除一个本地标签；-D为强制删除
+命令git push origin :refs/tags/<tagname>可以删除一个远程标签。
+查看远程分支 git branch -r
+
+自定义git
+忽略特殊文件
+忽略某些文件时，需要编写.gitignore；
+.gitignore文件本身要放到版本库里，并且可以对.gitignore做版本管理！
+添加例外规则如下：
+# 排除所有.开头的隐藏文件:
+.*
+# 排除所有.class文件:
+*.class
+
+# 不排除.gitignore和App.class:
+!.gitignore
+!App.class
+把指定文件排除在.gitignore规则外的写法就是!+文件名
+
+配置别名
+git config --global alias.st status
+--global参数是全局参数，也就是这些命令在这台电脑的所有Git仓库下都有用
+
+查看暂存区
+查看暂存区文件信息git ls-files
+删除缓存区文件
+git rm --cached <filename>
+执行后可以撤销，恢复删除的暂存区文件
