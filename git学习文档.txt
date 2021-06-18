@@ -7,7 +7,7 @@ git commit -m "描述变更内容"
 修改文件后，查看git状态
 git status
 看到文件有变更，可用
-git diff file
+git diff file（可查询到工作区与版本库的不同，添加到暂存区需要用git diff HEAD -- file查看）
 查看版本变更细节
 然后再次添加，查看状态，显示可以提交，进行提交操作
 若要进行回退，先查看提交历史-过往版本号
@@ -176,3 +176,7 @@ git config --global alias.st status
 删除缓存区文件
 git rm --cached <filename>
 执行后可以撤销，恢复删除的暂存区文件
+
+git 切换分支时会把未add或未commit的内容带过去，这一点值得注意。
+为什么呢？
+因为未add的内容不属于任何一个分支， 未commit的内容也不属于任何一个分支。 也就是说，对于所有分支而言，工作区和暂存区是公共的。
